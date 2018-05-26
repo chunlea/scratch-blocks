@@ -532,7 +532,7 @@ Blockly.Extensions.registerMixin('contextMenu_getVariableBlock',
 /**
  * Callback factory for dropdown menu options associated with a variable getter
  * block.  Each variable on the workspace gets its own item in the dropdown
- * menu, and clicking on that item changes the text of the field on the source
+ * menu, and clicking on that item changes the value of the field on the source
  * block.
  * @param {!Blockly.Block} block The block to update.
  * @param {string} name The new name to display on the block.
@@ -544,7 +544,10 @@ Blockly.Constants.Data.VARIABLE_OPTION_CALLBACK_FACTORY = function(block, name) 
     if (!variableField) {
       console.log("Tried to get a variable field on the wrong type of block.");
     }
-    variableField.setText(name);
+    var variable = block.workspace.getVariable(name);
+    if (variable) {
+      variableField.setValue(variable.id_);
+    }
   };
 };
 
