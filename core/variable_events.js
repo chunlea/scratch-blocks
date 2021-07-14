@@ -88,6 +88,8 @@ Blockly.Events.VarCreate = function(variable) {
   Blockly.Events.VarCreate.superClass_.constructor.call(this, variable);
   this.varType = variable.type;
   this.varName = variable.name;
+  this.isLocal = variable.isLocal;
+  this.isCloud = variable.isCloud;
 };
 goog.inherits(Blockly.Events.VarCreate, Blockly.Events.VarBase);
 
@@ -105,6 +107,8 @@ Blockly.Events.VarCreate.prototype.toJson = function() {
   var json = Blockly.Events.VarCreate.superClass_.toJson.call(this);
   json['varType'] = this.varType;
   json['varName'] = this.varName;
+  json['isLocal'] = this.isLocal;
+  json['isCloud'] = this.isCloud;
   return json;
 };
 
@@ -116,6 +120,8 @@ Blockly.Events.VarCreate.prototype.fromJson = function(json) {
   Blockly.Events.VarCreate.superClass_.fromJson.call(this, json);
   this.varType = json['varType'];
   this.varName = json['varName'];
+  this.isLocal = json['isLocal'];
+  this.isCloud = json['isCloud'];
 };
 
 /**
@@ -125,7 +131,7 @@ Blockly.Events.VarCreate.prototype.fromJson = function(json) {
 Blockly.Events.VarCreate.prototype.run = function(forward) {
   var workspace = this.getEventWorkspace_();
   if (forward) {
-    workspace.createVariable(this.varName, this.varType, this.varId);
+    workspace.createVariable(this.varName, this.varType, this.varId, this.isLocal, this.isCloud);
   } else {
     workspace.deleteVariableById(this.varId);
   }
@@ -145,6 +151,8 @@ Blockly.Events.VarDelete = function(variable) {
   Blockly.Events.VarDelete.superClass_.constructor.call(this, variable);
   this.varType = variable.type;
   this.varName = variable.name;
+  this.isLocal = variable.isLocal;
+  this.isCloud = variable.isCloud;
 };
 goog.inherits(Blockly.Events.VarDelete, Blockly.Events.VarBase);
 
@@ -162,6 +170,8 @@ Blockly.Events.VarDelete.prototype.toJson = function() {
   var json = Blockly.Events.VarDelete.superClass_.toJson.call(this);
   json['varType'] = this.varType;
   json['varName'] = this.varName;
+  json['isLocal'] = this.isLocal;
+  json['isCloud'] = this.isCloud;
   return json;
 };
 
@@ -173,6 +183,8 @@ Blockly.Events.VarDelete.prototype.fromJson = function(json) {
   Blockly.Events.VarDelete.superClass_.fromJson.call(this, json);
   this.varType = json['varType'];
   this.varName = json['varName'];
+  this.isLocal = json['isLocal'];
+  this.isCloud = json['isCloud'];
 };
 
 /**
@@ -184,7 +196,7 @@ Blockly.Events.VarDelete.prototype.run = function(forward) {
   if (forward) {
     workspace.deleteVariableById(this.varId);
   } else {
-    workspace.createVariable(this.varName, this.varType, this.varId);
+    workspace.createVariable(this.varName, this.varType, this.varId, this.isLocal, this.isCloud);
   }
 };
 

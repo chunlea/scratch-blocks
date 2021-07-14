@@ -29,6 +29,7 @@ goog.provide('Blockly.Block');
 goog.require('Blockly.Blocks');
 goog.require('Blockly.Colours');
 goog.require('Blockly.Comment');
+goog.require('Blockly.ScratchBlockComment');
 goog.require('Blockly.Connection');
 goog.require('Blockly.Events.BlockChange');
 goog.require('Blockly.Events.BlockCreate');
@@ -238,6 +239,13 @@ Blockly.Block.prototype.colourSecondary_ = '#FF0000';
 Blockly.Block.prototype.colourTertiary_ = '#FF0000';
 
 /**
+ * Fill colour used to override default shadow colour behaviour.
+ * @type {string}
+ * @private
+ */
+Blockly.Block.prototype.shadowColour_ = null;
+
+/**
  * Dispose of this block.
  * @param {boolean} healStack If true, then try to heal any gap by connecting
  *     the next statement with the previous statement.  Otherwise, dispose of
@@ -331,13 +339,15 @@ Blockly.Block.prototype.unplug = function(opt_healStack) {
       // Disconnect from any superior block.
       this.outputConnection.disconnect();
     }
-  } else if (this.previousConnection) {
-    var previousTarget = null;
-    if (this.previousConnection.isConnected()) {
-      // Remember the connection that any next statements need to connect to.
-      previousTarget = this.previousConnection.targetConnection;
-      // Detach this block from the parent's tree.
-      this.previousConnection.disconnect();
+  } else {
+    if (this.previousConnection) {
+      var previousTarget = null;
+      if (this.previousConnection.isConnected()) {
+        // Remember the connection that any next statements need to connect to.
+        previousTarget = this.previousConnection.targetConnection;
+        // Detach this block from the parent's tree.
+        this.previousConnection.disconnect();
+      }
     }
     var nextBlock = this.getNextBlock();
     if (opt_healStack && nextBlock) {
@@ -786,6 +796,35 @@ Blockly.Block.prototype.getColourSecondary = function() {
  */
 Blockly.Block.prototype.getColourTertiary = function() {
   return this.colourTertiary_;
+};
+
+/**
+ * Get the shadow colour of a block.
+ * @return {string} #RRGGBB string.
+ */
+Blockly.Block.prototype.getShadowColour = function() {
+  return this.shadowColour_;
+};
+
+/**
+ * Set the shadow colour of a block.
+ * @param {number|string} colour HSV hue value, or #RRGGBB string.
+ */
+Blockly.Block.prototype.setShadowColour = function(colour) {
+  this.shadowColour_ = this.makeColour_(colour);
+  if (this.rendered) {
+    this.updateColour();
+  }
+};
+
+/**
+ * Clear the shadow colour of a block.
+ */
+Blockly.Block.prototype.clearShadowColour = function() {
+  this.shadowColour_ = null;
+  if (this.rendered) {
+    this.updateColour();
+  }
 };
 
 /**

@@ -246,7 +246,7 @@ Blockly.Css.CONTENT = [
     'box-shadow: 0px 0px 8px 1px ' + Blockly.Colours.dropDownShadow + ';',
     'padding: 4px;',
     '-webkit-user-select: none;',
-    'min-height: 26px',
+    'min-height: 15px',
   '}',
 
   '.blocklyDropDownContent {',
@@ -488,18 +488,13 @@ Blockly.Css.CONTENT = [
   '.blocklyBubbleText {',
     'fill: $colour_text;',
   '}',
-
-  '.blocklyFlyout {',
-    'position: absolute;',
-    'z-index: 20;',
-  '}',
-
   '.blocklyFlyout {',
     'position: absolute;',
     'z-index: 20;',
   '}',
   '.blocklyFlyoutButton {',
     'fill: none;',
+    'pointer-events: all;',
   '}',
 
   '.blocklyFlyoutButtonBackground {',
@@ -525,6 +520,11 @@ Blockly.Css.CONTENT = [
 
   '.blocklyFlyoutLabelBackground {',
     'opacity: 0;',
+  '}',
+
+  '.blocklyTouchTargetBackground {',
+    'fill: transparent;',
+    'cursor: pointer;',
   '}',
 
   '.blocklyFlyoutLabelText {',
@@ -647,6 +647,69 @@ Blockly.Css.CONTENT = [
     'stroke: #fc3;',
   '}',
 
+  // Scratch Comments
+
+  '.scratchCommentForeignObject {',
+    'position: relative;',
+  '}',
+
+  '.scratchCommentBody {',
+    'background-color: #fef49c;',
+    'border-radius: 4px;',
+  '}',
+
+  '.scratchCommentRect {',
+    'fill: #fef49c;',
+  '}',
+
+  '.scratchCommentTarget {',
+    'fill: transparent;',
+  '}',
+
+  '.scratchWorkspaceCommentBorder {',
+    'stroke: #bcA903;',
+    'stroke-width: 1px;',
+  '}',
+
+  '.scratchCommentTargetFocused {',
+    'fill: none;',
+  '}',
+
+  '.scratchCommentTopBar {',
+    'fill: #000000;',
+    'fill-opacity: 0.1',
+  '}',
+
+  '.scratchCommentText {',
+    'font-family: "Helvetica Neue", Helvetica, sans-serif;',
+    'font-size: 12pt;',
+    'font-weight: 400;',
+  '}',
+
+  '.scratchCommentTextarea {',
+    'background-color: #fef49c;',
+    'border: 0;',
+    'outline: 0;',
+    'padding: 0;',
+    'resize: none;',
+    'overflow: hidden;',
+  '}',
+
+  '.scratchCommentTextarea::placeholder {',
+    'color: rgba(0,0,0,0.5);',
+    'font-style: italic;',
+  '}',
+
+  '.scratchCommentResizeSE {',
+    'cursor: se-resize;',
+    'fill: transparent;',
+  '}',
+
+  '.scratchCommentResizeSW {',
+    'cursor: sw-resize;',
+    'fill: transparent;',
+  '}',
+
   '.blocklyHtmlInput {',
     'border: none;',
     'font-family: "Helvetica Neue", Helvetica, sans-serif;',
@@ -742,6 +805,9 @@ Blockly.Css.CONTENT = [
     'cursor: pointer;',
   '}',
 
+  '.blocklyAngleDragArrow {',
+    'pointer-events: none',
+  '}',
 
   '.blocklyAngleMarks {',
     'stroke: #fff;',
@@ -763,6 +829,7 @@ Blockly.Css.CONTENT = [
 
   '.blocklyContextMenu {',
     'border-radius: 4px;',
+    'max-height: 100%;',
   '}',
 
   '.blocklyDropdownMenu {',
@@ -936,6 +1003,19 @@ Blockly.Css.CONTENT = [
 
   '.scratchColourPickerReadout {',
     'margin-left: 10px;',
+  '}',
+
+  '.scratchMatrixButtonDiv {',
+    'width: 50%;',
+    'text-align: center;',
+    'float: left;',
+  '}',
+
+  '.scratchNotePickerKeyLabel {',
+    'font-family: "Helvetica Neue", Helvetica, sans-serif;',
+    'font-size: 0.75rem;',
+    'fill: $colour_text;',
+    'pointer-events: none;',
   '}',
 
   /* Copied from: goog/css/menu.css */
@@ -1124,7 +1204,7 @@ Blockly.Css.CONTENT = [
   '.blocklyDropDownDiv .goog-menuitem-rtl .goog-menuitem-icon {',
      /* Flip left/right positioning. */
      'float: right;',
-     'margin-left: 6px;',
+     'margin-right: -24px;',
   '}',
 
   /* Keyboard shortcut ("accelerator") style. */
@@ -1190,12 +1270,13 @@ Blockly.Css.CONTENT = [
     'stroke: #c8c8c8;',
   '}',
 
-  '.blocklyFlyoutCheckbox.checked {',
+  '.checked > .blocklyFlyoutCheckbox {',
     'fill: ' + Blockly.Colours.motion.primary + ';',
     'stroke: ' + Blockly.Colours.motion.tertiary + ';',
   '}',
 
   '.blocklyFlyoutCheckboxPath {',
+    'fill: transparent;',
     'stroke: white;',
     'stroke-width: 3;',
     'stroke-linecap: round;',
@@ -1203,7 +1284,7 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.scratchCategoryMenu {',
-    'width: 52px;',
+    'width: 60px;',
     'background: $colour_toolbox;',
     'color: $colour_toolboxText;',
     'font-size: .7rem;',

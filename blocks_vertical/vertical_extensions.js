@@ -176,15 +176,14 @@ Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_DEF_CONTEXTMENU = {
           var didDelete = Blockly.Procedures.deleteProcedureDefCallback(
               procCode, rootBlock);
           if (!didDelete) {
-            // TODO:(#1151)
-            alert('To delete a block definition, first remove all uses of the block');
+            alert(Blockly.Msg.PROCEDURE_USED);
           }
         };
       }
     }
     // Find and remove the duplicate option
     for (var i = 0, option; option = menuOptions[i]; i++) {
-      if (option.text == Blockly.Msg.DUPLICATE_BLOCK) {
+      if (option.text == Blockly.Msg.DUPLICATE) {
         menuOptions.splice(i, 1);
         break;
       }

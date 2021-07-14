@@ -182,11 +182,7 @@ Blockly.utils.getRelativeXY = function(element) {
   // Then check for style = transform: translate(...) or translate3d(...)
   var style = element.getAttribute('style');
   if (style && style.indexOf('translate') > -1) {
-    var styleComponents = style.match(Blockly.utils.getRelativeXY.XY_2D_REGEX_);
-    // Try transform3d if 2d transform wasn't there.
-    if (!styleComponents) {
-      styleComponents = style.match(Blockly.utils.getRelativeXY.XY_3D_REGEX_);
-    }
+    var styleComponents = style.match(Blockly.utils.getRelativeXY.XY_STYLE_REGEX_);
     if (styleComponents) {
       xy.x += parseFloat(styleComponents[1]);
       if (styleComponents[3]) {
@@ -251,7 +247,7 @@ Blockly.utils.getScale_ = function(element) {
  * @private
  */
 Blockly.utils.getRelativeXY.XY_REGEX_ =
-    /translate\(\s*([-+\d.e]+)([ ,]\s*([-+\d.e]+)\s*\))?/;
+    /translate\(\s*([-+\d.e]+)([ ,]\s*([-+\d.e]+)\s*)?/;
 
 
 /**
@@ -263,22 +259,14 @@ Blockly.utils.getRelativeXY.XY_REGEX_ =
 Blockly.utils.getScale_REGEXP_ = /scale\(\s*([-+\d.e]+)\s*\)/;
 
 /**
- * Static regex to pull the x,y,z values out of a translate3d() style property.
+ * Static regex to pull the x,y values out of a translate3d() or translate3d()
+ * style property.
  * Accounts for same exceptions as XY_REGEXP_.
  * @type {!RegExp}
  * @private
  */
-Blockly.utils.getRelativeXY.XY_3D_REGEX_ =
-    /transform:\s*translate3d\(\s*([-+\d.e]+)px([ ,]\s*([-+\d.e]+)\s*)px([ ,]\s*([-+\d.e]+)\s*)px\)?/;
-
-/**
- * Static regex to pull the x,y,z values out of a translate3d() style property.
- * Accounts for same exceptions as XY_REGEXP_.
- * @type {!RegExp}
- * @private
- */
-Blockly.utils.getRelativeXY.XY_2D_REGEX_ =
-    /transform:\s*translate\(\s*([-+\d.e]+)px([ ,]\s*([-+\d.e]+)\s*)px\)?/;
+Blockly.utils.getRelativeXY.XY_STYLE_REGEX_ =
+    /transform:\s*translate(?:3d)?\(\s*([-+\d.e]+)\s*px([ ,]\s*([-+\d.e]+)\s*px)?/;
 
 /**
  * Helper method for creating SVG elements.
@@ -867,9 +855,9 @@ Blockly.utils.is3dSupported = function() {
  * Contrast with node.insertBefore function.
  * @param {!Element} newNode New element to insert.
  * @param {!Element} refNode Existing element to precede new node.
- * @private
+ * @package
  */
-Blockly.utils.insertAfter_ = function(newNode, refNode) {
+Blockly.utils.insertAfter = function(newNode, refNode) {
   var siblingNode = refNode.nextSibling;
   var parentNode = refNode.parentNode;
   if (!parentNode) {
@@ -934,4 +922,27 @@ Blockly.utils.getViewportBBox = function() {
     top: scrollOffset.y,
     left: scrollOffset.x
   };
+};
+
+/**
+ * Fast prefix-checker.
+ * Copied from Closure's goog.string.startsWith.
+ * @param {string} str The string to check.
+ * @param {string} prefix A string to look for at the start of `str`.
+ * @return {boolean} True if `str` begins with `prefix`.
+ * @package
+ */
+Blockly.utils.startsWith = function(str, prefix) {
+  return str.lastIndexOf(prefix, 0) == 0;
+};
+
+/**
+ * Converts degrees to radians.
+ * Copied from Closure's goog.math.toRadians.
+ * @param {number} angleDegrees Angle in degrees.
+ * @return {number} Angle in radians.
+ * @package
+ */
+Blockly.utils.toRadians = function(angleDegrees) {
+  return angleDegrees * Math.PI / 180;
 };

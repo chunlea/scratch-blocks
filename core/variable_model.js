@@ -42,10 +42,13 @@ goog.require('goog.string');
  *     their type. This will default to '' which is a specific type.
  * @param {string=} opt_id The unique ID of the variable. This will default to
  *     a UUID.
+ * @param {boolean=} opt_isLocal Whether the variable is locally scoped.
+ * @param {boolean=} opt_isCloud Whether the variable is a cloud variable.
  * @see {Blockly.FieldVariable}
  * @constructor
  */
-Blockly.VariableModel = function(workspace, name, opt_type, opt_id) {
+Blockly.VariableModel = function(workspace, name, opt_type, opt_id,
+    opt_isLocal, opt_isCloud) {
   /**
    * The workspace the variable is in.
    * @type {!Blockly.Workspace}
@@ -77,6 +80,18 @@ Blockly.VariableModel = function(workspace, name, opt_type, opt_id) {
    * @private
    */
   this.id_ = opt_id || Blockly.utils.genUid();
+
+  /**
+   * Whether this variable is locally scoped.
+   * @package
+   */
+  this.isLocal = opt_isLocal || false;
+
+  /**
+   * Whether the variable is a cloud variable.
+   * @package
+   */
+  this.isCloud = opt_isCloud || false;
 
   Blockly.Events.fire(new Blockly.Events.VarCreate(this));
 };

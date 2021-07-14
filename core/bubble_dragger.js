@@ -159,7 +159,7 @@ Blockly.BubbleDragger.prototype.maybeDeleteBubble_ = function() {
 
   if (this.wouldDeleteBubble_) {
     if (trashcan) {
-      goog.Timer.callOnce(trashcan.close, 100, trashcan);
+      setTimeout(trashcan.close.bind(trashcan), 100);
     }
     // Fire a move event, so we know where to go back to for an undo.
     this.fireMoveEvent_();
@@ -235,14 +235,17 @@ Blockly.BubbleDragger.prototype.endBubbleDrag = function(
  * @private
  */
 Blockly.BubbleDragger.prototype.fireMoveEvent_ = function() {
+  var event = null;
   if (this.draggingBubble_.isComment) {
-    var event = new Blockly.Events.CommentMove(this.draggingBubble_);
-    event.setOldCoordinate(this.startXY_);
-    event.recordNew();
-    Blockly.Events.fire(event);
+    event = new Blockly.Events.CommentMove(this.draggingBubble_);
+  } else if (this.draggingBubble_ instanceof Blockly.ScratchBubble) {
+    event = new Blockly.Events.CommentMove(this.draggingBubble_.comment);
+  } else {
+    return;
   }
-  // TODO (fenichel): move events for comments.
-  return;
+  event.setOldCoordinate(this.startXY_);
+  event.recordNew();
+  Blockly.Events.fire(event);
 };
 
 /**

@@ -133,6 +133,31 @@ Blockly.Events.VAR_DELETE = 'var_delete';
 Blockly.Events.VAR_RENAME = 'var_rename';
 
 /**
+ * Name of event that creates a comment.
+ * @const
+ */
+Blockly.Events.COMMENT_CREATE = 'comment_create';
+
+/**
+ * Name of event that moves a comment.
+ * @const
+ */
+Blockly.Events.COMMENT_MOVE = 'comment_move';
+
+/**
+ * Name of event that changes a comment's property
+ * (text content, size, or minimized state).
+ * @const
+ */
+Blockly.Events.COMMENT_CHANGE = 'comment_change';
+
+/**
+ * Name of event that deletes a comment.
+ * @const
+ */
+Blockly.Events.COMMENT_DELETE = 'comment_delete';
+
+/**
  * Name of event that records a UI change.
  * @const
  */
@@ -192,15 +217,22 @@ Blockly.Events.filter = function(queueIn, forward) {
   for (var i = 0, event; event = queue[i]; i++) {
     if (!event.isNull()) {
       var key = [event.type, event.blockId, event.workspaceId].join(' ');
-      var lastEvent = hash[key];
-      if (!lastEvent) {
-        hash[key] = event;
+
+      var lastEntry = hash[key];
+      var lastEvent = lastEntry ? lastEntry.event : null;
+      if (!lastEntry) {
+        // Each item in the hash table has the event and the index of that event
+        // in the input array.  This lets us make sure we only merge adjacent
+        // move events.
+        hash[key] = {event: event, index: i};
         mergedQueue.push(event);
-      } else if (event.type == Blockly.Events.MOVE) {
+      } else if (event.type == Blockly.Events.MOVE &&
+          lastEntry.index == i - 1) {
         // Merge move events.
         lastEvent.newParentId = event.newParentId;
         lastEvent.newInputName = event.newInputName;
         lastEvent.newCoordinate = event.newCoordinate;
+        lastEntry.index = i;
       } else if (event.type == Blockly.Events.CHANGE &&
           event.element == lastEvent.element &&
           event.name == lastEvent.name) {
@@ -215,7 +247,7 @@ Blockly.Events.filter = function(queueIn, forward) {
         lastEvent.newValue = event.newValue;
       } else {
         // Collision: newer events should merge into this event to maintain order
-        hash[key] = event;
+        hash[key] = {event: event, index: 1};
         mergedQueue.push(event);
       }
     }
@@ -335,6 +367,18 @@ Blockly.Events.fromJson = function(json, workspace) {
       break;
     case Blockly.Events.VAR_RENAME:
       event = new Blockly.Events.VarRename(null);
+      break;
+    case Blockly.Events.COMMENT_CREATE:
+      event = new Blockly.Events.CommentCreate(null);
+      break;
+    case Blockly.Events.COMMENT_CHANGE:
+      event = new Blockly.Events.CommentChange(null);
+      break;
+    case Blockly.Events.COMMENT_MOVE:
+      event = new Blockly.Events.CommentMove(null);
+      break;
+    case Blockly.Events.COMMENT_DELETE:
+      event = new Blockly.Events.CommentDelete(null);
       break;
     case Blockly.Events.UI:
       event = new Blockly.Events.Ui(null);

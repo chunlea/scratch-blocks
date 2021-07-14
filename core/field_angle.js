@@ -47,10 +47,12 @@ Blockly.FieldAngle = function(opt_value, opt_validator) {
   // Add degree symbol: '360°' (LTR) or '°360' (RTL)
   this.symbol_ = Blockly.utils.createSvgElement('tspan', {}, null);
   this.symbol_.appendChild(document.createTextNode('\u00B0'));
+  
+  var numRestrictor = new RegExp("[\\d]|[\\.]|[-]|[eE]");
 
   opt_value = (opt_value && !isNaN(opt_value)) ? String(opt_value) : '0';
   Blockly.FieldAngle.superClass_.constructor.call(
-      this, opt_value, opt_validator);
+      this, opt_value, opt_validator, numRestrictor);
   this.addArgType('angle');
 };
 goog.inherits(Blockly.FieldAngle, Blockly.FieldTextInput);
@@ -117,10 +119,17 @@ Blockly.FieldAngle.HANDLE_RADIUS = 10;
 Blockly.FieldAngle.ARROW_WIDTH = Blockly.FieldAngle.HANDLE_RADIUS;
 
 /**
+ * Half the stroke-width used for the "glow" around the drag handle, rounded up to nearest whole pixel
+ */
+
+Blockly.FieldAngle.HANDLE_GLOW_WIDTH = 3;
+
+/**
  * Radius of protractor circle.  Slightly smaller than protractor size since
  * otherwise SVG crops off half the border at the edges.
  */
-Blockly.FieldAngle.RADIUS = Blockly.FieldAngle.HALF - Blockly.FieldAngle.HANDLE_RADIUS - 1;
+Blockly.FieldAngle.RADIUS = Blockly.FieldAngle.HALF
+    - Blockly.FieldAngle.HANDLE_RADIUS - Blockly.FieldAngle.HANDLE_GLOW_WIDTH;
 
 /**
  * Radius of central dot circle.
@@ -159,10 +168,8 @@ Blockly.FieldAngle.prototype.dispose_ = function() {
  * @private
  */
 Blockly.FieldAngle.prototype.showEditor_ = function() {
-  var noFocus =
-      goog.userAgent.MOBILE || goog.userAgent.ANDROID || goog.userAgent.IPAD;
   // Mobile browsers have issues with in-line textareas (focus & keyboards).
-  Blockly.FieldAngle.superClass_.showEditor_.call(this, noFocus);
+  Blockly.FieldAngle.superClass_.showEditor_.call(this, this.useTouchInteraction_);
   // If there is an existing drop-down someone else owns, hide it immediately and clear it.
   Blockly.DropDownDiv.hideWithoutAnimation();
   Blockly.DropDownDiv.clearContent();
@@ -229,7 +236,8 @@ Blockly.FieldAngle.prototype.showEditor_ = function() {
         'width': Blockly.FieldAngle.ARROW_WIDTH,
         'height': Blockly.FieldAngle.ARROW_WIDTH,
         'x': -Blockly.FieldAngle.ARROW_WIDTH / 2,
-        'y': -Blockly.FieldAngle.ARROW_WIDTH / 2
+        'y': -Blockly.FieldAngle.ARROW_WIDTH / 2,
+        'class': 'blocklyAngleDragArrow'
       },
       this.handle_);
   this.arrowSvg_.setAttributeNS(
@@ -361,7 +369,7 @@ Blockly.FieldAngle.prototype.updateGraph_ = function() {
   this.gauge_.setAttribute('d', path.join(''));
   this.line_.setAttribute('x2', x2);
   this.line_.setAttribute('y2', y2);
-  this.handle_.setAttribute('transform', 'translate(' + x2 + ',' + y2 +')');
+  this.handle_.setAttribute('transform', 'translate(' + x2 + ',' + y2 + ')');
 };
 
 /**

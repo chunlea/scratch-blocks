@@ -31,6 +31,7 @@
 goog.provide('Blockly.ContextMenu');
 
 goog.require('Blockly.Events.BlockCreate');
+goog.require('Blockly.scratchBlocksUtils');
 goog.require('Blockly.utils');
 goog.require('Blockly.utils.uiMenu');
 
@@ -256,14 +257,16 @@ Blockly.ContextMenu.blockHelpOption = function(block) {
 /**
  * Make a context menu option for duplicating the current block.
  * @param {!Blockly.BlockSvg} block The block where the right-click originated.
+ * @param {!Event} event Event that caused the context menu to open.
  * @return {!Object} A menu option, containing text, enabled, and a callback.
  * @package
  */
-Blockly.ContextMenu.blockDuplicateOption = function(block) {
+Blockly.ContextMenu.blockDuplicateOption = function(block, event) {
   var duplicateOption = {
-    text: Blockly.Msg.DUPLICATE_BLOCK,
+    text: Blockly.Msg.DUPLICATE,
     enabled: true,
-    callback: block.duplicateAndDragCallback_()
+    callback:
+        Blockly.scratchBlocksUtils.duplicateAndDragCallback(block, event)
   };
   return duplicateOption;
 };
@@ -290,6 +293,7 @@ Blockly.ContextMenu.blockCommentOption = function(block) {
     commentOption.text = Blockly.Msg.ADD_COMMENT;
     commentOption.callback = function() {
       block.setCommentText('');
+      block.comment.focus();
     };
   }
   return commentOption;
@@ -414,7 +418,7 @@ Blockly.ContextMenu.wsExpandOption = function(hasCollapsedBlocks, topBlocks) {
  */
 Blockly.ContextMenu.commentDeleteOption = function(comment) {
   var deleteOption = {
-    text: Blockly.Msg.REMOVE_COMMENT,
+    text: Blockly.Msg.DELETE,
     enabled: true,
     callback: function() {
       Blockly.Events.setGroup(true);
@@ -434,7 +438,7 @@ Blockly.ContextMenu.commentDeleteOption = function(comment) {
  */
 Blockly.ContextMenu.commentDuplicateOption = function(comment) {
   var duplicateOption = {
-    text: Blockly.Msg.DUPLICATE_COMMENT,
+    text: Blockly.Msg.DUPLICATE,
     enabled: true,
     callback: function() {
       Blockly.duplicate_(comment);
@@ -455,10 +459,18 @@ Blockly.ContextMenu.workspaceCommentOption = function(ws, e) {
   // Helper function to create and position a comment correctly based on the
   // location of the mouse event.
   var addWsComment = function() {
+    // Disable events while this comment is getting created
+    // so that we can fire a single create event for this comment
+    // at the end (instead of CommentCreate followed by CommentMove,
+    // which results in unexpected undo behavior).
+    var disabled = false;
+    if (Blockly.Events.isEnabled()) {
+      Blockly.Events.disable();
+      disabled = true;
+    }
     var comment = new Blockly.WorkspaceCommentSvg(
-        ws, Blockly.Msg.WORKSPACE_COMMENT_DEFAULT_TEXT,
-        Blockly.WorkspaceCommentSvg.DEFAULT_SIZE,
-        Blockly.WorkspaceCommentSvg.DEFAULT_SIZE);
+        ws, '', Blockly.WorkspaceCommentSvg.DEFAULT_SIZE,
+        Blockly.WorkspaceCommentSvg.DEFAULT_SIZE, false);
 
     var injectionDiv = ws.getInjectionDiv();
     // Bounding rect coordinates are in client coordinates, meaning that they
@@ -490,6 +502,10 @@ Blockly.ContextMenu.workspaceCommentOption = function(ws, e) {
       comment.render(false);
       comment.select();
     }
+    if (disabled) {
+      Blockly.Events.enable();
+    }
+    Blockly.WorkspaceComment.fireCreateEvent(comment);
   };
 
   var wsCommentOption = {enabled: true};

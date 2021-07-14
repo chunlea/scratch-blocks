@@ -251,8 +251,8 @@ Blockly.Workspace.prototype.getTopComments = function(ordered) {
       offset *= -1;
     }
     comments.sort(function(a, b) {
-      var aXY = a.getRelativeToSurfaceXY();
-      var bXY = b.getRelativeToSurfaceXY();
+      var aXY = a instanceof Blockly.ScratchBlockComment ? a.getXY() : a.getRelativeToSurfaceXY();
+      var bXY = b instanceof Blockly.ScratchBlockComment ? b.getXY() : b.getRelativeToSurfaceXY();
       return (aXY.y + offset * aXY.x) - (bXY.y + offset * bXY.x);
     });
   }
@@ -340,10 +340,13 @@ Blockly.Workspace.prototype.renameVariableById = function(id, newName) {
  *     their type. This will default to '' which is a specific type.
  * @param {string=} opt_id The unique ID of the variable. This will default to
  *     a UUID.
+ * @param {boolean=} opt_isLocal Whether the variable to create is locally scoped.
+ * @param {boolean=} opt_isCloud Whether the variable to create is locally scoped.
  * @return {?Blockly.VariableModel} The newly created variable.
  */
-Blockly.Workspace.prototype.createVariable = function(name, opt_type, opt_id) {
-  return this.variableMap_.createVariable(name, opt_type, opt_id);
+Blockly.Workspace.prototype.createVariable = function(name, opt_type, opt_id,
+    opt_isLocal, opt_isCloud) {
+  return this.variableMap_.createVariable(name, opt_type, opt_id, opt_isLocal, opt_isCloud);
 };
 
 /**
@@ -488,6 +491,14 @@ Blockly.Workspace.prototype.undo = function(redo) {
   }
   events = Blockly.Events.filter(events, redo);
   Blockly.Events.recordUndo = false;
+  if (Blockly.selected) {
+    Blockly.Events.disable();
+    try {
+      Blockly.selected.unselect();
+    } finally {
+      Blockly.Events.enable();
+    }
+  }
   try {
     for (var i = 0, event; event = events[i]; i++) {
       event.run(redo);

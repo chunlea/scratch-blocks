@@ -86,10 +86,10 @@ Blockly.Toolbox = function(workspace) {
 
 /**
  * Width of the toolbox, which changes only in vertical layout.
- * This is the sum of the width of the flyout (250) and the category menu (52).
+ * This is the sum of the width of the flyout (250) and the category menu (60).
  * @type {number}
  */
-Blockly.Toolbox.prototype.width = 302;
+Blockly.Toolbox.prototype.width = 310;
 
 /**
  * Height of the toolbox, which changes only in horizontal layout.
@@ -161,7 +161,8 @@ Blockly.Toolbox.prototype.createFlyout_ = function() {
     RTL: workspace.RTL,
     oneBasedIndex: workspace.options.oneBasedIndex,
     horizontalLayout: workspace.horizontalLayout,
-    toolboxPosition: workspace.options.toolboxPosition
+    toolboxPosition: workspace.options.toolboxPosition,
+    stackGlowFilterId: workspace.options.stackGlowFilterId
   };
 
   if (workspace.horizontalLayout) {
@@ -198,10 +199,13 @@ Blockly.Toolbox.prototype.showAll_ = function() {
 
     // create a label node to go at the top of the category
     var labelString = '<xml><label text="' + category.name_ + '"' +
+      ' id="' + category.id_ + '"' +
       ' category-label="true"' +
+      ' showStatusButton="' + category.showStatusButton_ + '"' +
       ' web-class="categoryLabel">' +
       '</label></xml>';
     var labelXML = Blockly.Xml.textToDom(labelString);
+
     allContents.push(labelXML.firstChild);
 
     allContents = allContents.concat(category.getContents());
@@ -555,8 +559,10 @@ Blockly.Toolbox.prototype.selectCategoryById = function(id) {
 Blockly.Toolbox.prototype.setSelectedItemFactory = function(item) {
   var selectedItem = item;
   return function() {
-    this.setSelectedItem(selectedItem);
-    Blockly.Touch.clearTouchIdentifier();
+    if (!this.workspace_.isDragging()) {
+      this.setSelectedItem(selectedItem);
+      Blockly.Touch.clearTouchIdentifier();
+    }
   };
 };
 
@@ -659,6 +665,7 @@ Blockly.Toolbox.Category = function(parent, parentHtml, domTree) {
   this.setColour(domTree);
   this.custom_ = domTree.getAttribute('custom');
   this.iconURI_ = domTree.getAttribute('iconURI');
+  this.showStatusButton_ = domTree.getAttribute('showStatusButton');
   this.contents_ = [];
   if (!this.custom_) {
     this.parseContents_(domTree);
@@ -680,14 +687,33 @@ Blockly.Toolbox.Category.prototype.dispose = function() {
 };
 
 /**
+ * Used to determine the css classes for the menu item for this category
+ * based on its current state.
+ * @private
+ * @param {boolean=} selected Indication whether the category is currently selected.
+ * @return {string} The css class names to be applied, space-separated.
+ */
+Blockly.Toolbox.Category.prototype.getMenuItemClassName_ = function(selected) {
+  var classNames = [
+    'scratchCategoryMenuItem',
+    'scratchCategoryId-' + this.id_,
+  ];
+  if (selected) {
+    classNames.push('categorySelected');
+  }
+  return classNames.join(' ');
+};
+
+/**
  * Create the DOM for a category in the toolbox.
  */
 Blockly.Toolbox.Category.prototype.createDom = function() {
   var toolbox = this.parent_.parent_;
   this.item_ = goog.dom.createDom('div',
-      {'class': 'scratchCategoryMenuItem'});
+      {'class': this.getMenuItemClassName_()});
   this.label_ = goog.dom.createDom('div',
-      {'class': 'scratchCategoryMenuItemLabel'}, this.name_);
+      {'class': 'scratchCategoryMenuItemLabel'},
+      Blockly.utils.replaceMessageReferences(this.name_));
   if (this.iconURI_) {
     this.bubble_ = goog.dom.createDom('div',
         {'class': 'scratchCategoryItemIcon'});
@@ -710,11 +736,7 @@ Blockly.Toolbox.Category.prototype.createDom = function() {
  * @param {boolean} selected Whether this category is selected.
  */
 Blockly.Toolbox.Category.prototype.setSelected = function(selected) {
-  if (selected) {
-    this.item_.className = 'scratchCategoryMenuItem categorySelected';
-  } else {
-    this.item_.className = 'scratchCategoryMenuItem';
-  }
+  this.item_.className = this.getMenuItemClassName_(selected);
 };
 
 /**
